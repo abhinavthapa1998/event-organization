@@ -38,4 +38,32 @@ contract EventContract {
         );
         nextId++;
     }
+
+    function buyTicket(uint256 id, uint256 quantity) external payable {
+        require(events[id].date != 0, "Event does not exist");
+        require(
+            events[id].date > block.timestamp,
+            "Event has already occurred"
+        );
+        Event storage _event = events[id];
+        require(msg.value == (_event.price * quantity), "Ethers is not enough");
+        require(_event.ticketRemain >= quantity, "Not enough tickets");
+        _event.ticketRemain--;
+        tickets[msg.sender][id] += quantity;
+    }
+
+    function transferTicket(
+        uint256 id,
+        uint256 quantity,
+        address to
+    ) external {
+        require(events[id].date != 0, "Event does not exist");
+        require(
+            events[id].date > block.timestamp,
+            "Event has already occurred"
+        );
+        require(tickets[msg.sender][id] >= quantity, "Not enough tickets");
+        tickets[msg.sender][id] -= quantity;
+        tickets[to][id] += quantity;
+    }
 }
